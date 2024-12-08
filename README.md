@@ -1,14 +1,21 @@
 
 <center>
-    <h4>All rights reserved to Cadi IT Solutions founded by Aldwin Nunag &copy; 2022</h4>
-    <img src="images/CADITISOL.jpg">
+    <h5>All rights reserved to Cadi IT Solutions founded by Aldwin Nunag &copy; 2022</h5>
+    <img src="images/CADITISOL.jpg" width="60%">
 </center>
+<br>
 <small>Cadi IT Solution is a comprehensive IT service provider dedicated to delivering tailored technology solutions for businesses. From software development and system integration to IT consultancy and support, we ensure our clients achieve efficiency and innovation through cutting-edge technology. 
 Partner with us for reliable and customized IT solutions that drive your success.</small>
 
 <hr>
 
-<h1>Ale Scheduling Algorithm</h1>
+<h3>Disclaimer</h3>
+The ALE Scheduling Algorithm is exclusively developed by Cadi IT Solutions, founded by Aldwin Nunag. This algorithm and its implementation are proprietary and intended solely for use within authorized projects.
+Any redistribution, modification, or unauthorized use of this algorithm is strictly prohibited without prior written consent from Cadi IT Solutions.
+
+<hr>
+
+# Ale Scheduling Algorithm
 
 The function "`countAvailablePerSubject()`" gets all the subjects that the students currently take and how many sections take each courses.
 the return value is:
@@ -36,9 +43,8 @@ The function "<code>assignCoursesToFaculties()</code>" will assign courses to fa
 
 <hr>
 
-<h3>Features to be implemented for Web Application</h3> 
+### Features to be implemented for Web Application 
 <ul>
     <li>Add Cron jobs for notifying faculty students about their schedule every day</li>
-
-[//]: # (    <li></li>)
+    <li>Automated Scheduling, lessen the manual scheduling during initial scheduling.</li>
 </ul>

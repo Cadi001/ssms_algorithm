@@ -1,17 +1,26 @@
+
+<html>
+<head>
+
+<body style="background-color: black; color: whitesmoke;">
+
 <?php
+
+use Cassandra\Date;
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 $sections = [
-    ['C101', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['MATH101', 'HIS101', 'PHY101', '6APPDEV']],
-    ['C102', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['ENG101', 'HIS101', 'PHY101', '6APPDEV']],
-    ['C103', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['MATH101', 'HIS101', 'PHY101', '6APPDEV']],
-    ['C104', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['ENG101', 'HIS101', 'CHEM101', '6APPDEV']],
-    ['C105', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['MATH101', 'ECO101', 'STAT101', '6APPDEV']],
-    ['C106', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['MATH101', 'HIS101', 'STAT101', 'PROG101']],
-    ['C107', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['MATH101', 'ECO101', 'STAT101', '6APPDEV']],
-    ['C108', 'availability' => ['start_time'=> strtotime('12:00'), 'end_time'=> strtotime('21:00')],'bias'=>[], 'courses' => ['ECO101', 'HIS101', 'PHY101', 'PROG101']],
+    ['section' => 'C101', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['MATH101', 'HIS101', 'PHY101', '6APPDEV']],
+    ['section' => 'C102', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['ENG101', 'HIS101', 'PHY101', '6APPDEV']],
+    ['section' => 'C103', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['MATH101', 'HIS101', 'PHY101', '6APPDEV']],
+    ['section' => 'C104', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['ENG101', 'HIS101', 'CHEM101', '6APPDEV']],
+    ['section' => 'C105', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['MATH101', 'ECO101', 'STAT101', '6APPDEV']],
+    ['section' => 'C106', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['MATH101', 'HIS101', 'STAT101', 'PROG101']],
+    ['section' => 'C107', 'availability' => ['start_time'=> strtotime('07:00'), 'end_time'=> strtotime('04:00')],'bias'=>[], 'courses' => ['MATH101', 'ECO101', 'STAT101', '6APPDEV']],
+    ['section' => 'C108', 'availability' => ['start_time'=> strtotime('12:00'), 'end_time'=> strtotime('21:00')],'bias'=>[], 'courses' => ['ECO101', 'BIO101', 'PHY101', 'PROG101']],
 ];
 
 // 11 COURSE AS SAMPLE DATA
@@ -131,10 +140,6 @@ function countAvailablePerSubject() {
 // Call the function and store the result in the $coursesLimit variable
 $coursesLimit = countAvailablePerSubject();
 
-
-
-
-
 /*
  *   IMPLEMENTED CONSTRAINTS
  *   THE LIMITS THAT COURSES HOLDS IS HOW MANY DOES SECTION TAKE THE SPECIFIC COURSES
@@ -147,12 +152,14 @@ $coursesLimit = countAvailablePerSubject();
  *   DIFFERENT SUBJECT IS NOT DETECTED IN MAX 25 HOURS
  * */
 function assignCoursesToFaculties() {
+    print('Assigning courses to faculties...<br>');
+
     global $faculties, $courses, $sections, $coursesLimit;
-    print("List of courses can be assigned: ".json_encode($coursesLimit));
+//    print("List of courses can be assigned: ".json_encode($coursesLimit));
 //    print( json_encode($coursesLimit['PROG101']));
     $assignments = [];
     $facultiesReachedLimit = [];
-
+    print('Getting all faculties...<br>');
     foreach ($faculties as &$faculty) {
         // Skip if faculty has already been assigned the maximum number of hours
         if (in_array($faculty['name'], $facultiesReachedLimit)) {
@@ -180,9 +187,10 @@ function assignCoursesToFaculties() {
                         // Assign the course to the faculty (without assigning room)
                         $assignments[] = [
                             'course' => $course_code,
+                            'course_hours' => $course['hours'],
                             'faculty' => $faculty['name'],
-                            // Remove room assignment part temporarily
-                            // 'room' => $room['room']
+                            'section' => $section['section'],
+                            'pref_schedule' => $faculty['preferred_schedule']
                         ];
                         $coursesLimit[$course['course_code']]--;
 
@@ -198,23 +206,53 @@ function assignCoursesToFaculties() {
                 }
             }
         }
+//        print(json_encode($section, JSON_PRETTY_PRINT));
     }
 
     return $assignments;
 }
+//print(json_encode(assignCoursesToFaculties(), JSON_PRETTY_PRINT));
+
+function addFacultySchedule() {
+    print('Adding schedules to faculties...');
+    global $faculties, $courses;
+
+    $facultiesAndCourses = assignCoursesToFaculties();
+    $newSchedules = [];
+    $startTime = strtotime('7:00'); // Start time for scheduling
+    $endOfDay = strtotime('21:00'); // End time for the day
+
+    foreach ($facultiesAndCourses as $fac) {
+        $course_hours = $fac['course_hours']; // Duration of the course in hours
+        $timestamps = $course_hours * 3600; // Convert hours to seconds
+
+        // Calculate the course end time
+        $courseEndTime = $startTime + $timestamps;
+
+        // Check if the current course's end time exceeds the end of the day
+        if ($courseEndTime > $endOfDay) {
+            $startTime = strtotime('7:00', strtotime('+1 day', $startTime)); // Reset to the next day's start
+            $courseEndTime = $startTime + $timestamps; // Recalculate the end time for the course
+        }
+
+        // Add the course schedule to the newSchedules array
+        $newSchedules[] = [
+            "faculty_name" => $fac['faculty'],
+            "course_code" => $fac['course'],
+            "start_time" => date('Y-m-d H:i:s', $startTime),
+            "end_time" => date('Y-m-d H:i:s', $courseEndTime)
+        ];
+
+        // Update the start time for the next course
+        $startTime = $courseEndTime;
+    }
+
+    return $newSchedules;
+}
 
 
-
-// Calling the function and printing the assignments
-$assignments = assignCoursesToFaculties();
-echo "<pre>" . print_r($assignments, true) . "</pre>";
-
-
-
-//echo json_encode(assignCourseToFaculty(), JSON_PRETTY_PRINT);
-//print_r($coursesLimit);
-
-function assignRoomsToCourses(){
+print(json_encode(addFacultySchedule(), JSON_PRETTY_PRINT));
+function assignRoomsToFacultiesBasedOnCourses(){
 
 }
 function canSchedule(){
@@ -223,3 +261,6 @@ function canSchedule(){
 
 
 ?>
+
+</body>
+</html>
