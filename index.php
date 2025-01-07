@@ -224,6 +224,7 @@ function assignCoursesSectionsRoomsToFaculties()
                             'room' => $suitableRoom['room'],
                             'room_type' => $suitableRoom['room_type'],
                             'block_hours' => $currentBlockHours,
+                            'preferred_schedule' => $faculty['preferred_schedule']
                         ];
 
                         $remainingHours -= $currentBlockHours;
